@@ -9,7 +9,7 @@ app.use(cors());
 app.use(express.json());
 
 
-mongoose.connect("mongodb+srv://Logesh:logesh123@cluster0.w2bo1zv.mongodb.net/passkey?retryWrites=true&w=majority&appName=Cluster0").then(function () {
+mongoose.connect(process.env.MONGO_URI).then(function () {
     console.log("Mongodb connected");
 }).catch(function () {
     console.log("Mongodb connection failed");
