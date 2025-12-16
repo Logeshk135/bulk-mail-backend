@@ -9,7 +9,7 @@ app.use(cors());
 app.use(express.json());
 
 
-mongoose.connect(process.env.MONGO_URI).then(function () {
+mongoose.connect(process.env.MONGO_URL).then(function () {
     console.log("Mongodb connected");
 }).catch(function () {
     console.log("Mongodb connection failed");
