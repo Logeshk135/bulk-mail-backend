@@ -9,11 +9,10 @@ app.use(cors());
 app.use(express.json());
 
 
-mongoose.connect(process.env.MONGO_URL).then(function () {
-    console.log("Mongodb connected");
-}).catch(function () {
-    console.log("Mongodb connection failed");
-})
+mongoose.connect(process.env.MONGO_URI)
+  .then(() => console.log("MongoDB connected"))
+  .catch(err => console.log("MongoDB error", err));
+
 
 
 app.get("/", (req, res) => {
@@ -71,7 +70,8 @@ app.post('/sendemail', (req, res) => {
 })
 
 
+const PORT = process.env.PORT || 5000;
 
-app.listen(5000, () => {
-    console.log('Server is started');
+app.listen(PORT, () => {
+  console.log("Server started on port " + PORT);
 });
