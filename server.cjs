@@ -7,7 +7,10 @@ const credential = mongoose.model("credential", {}, "bulkmail");
 
  const app = express();
 
-app.use(cors());
+app.use(cors({
+     origin: "https://bulk-mail-frontend-delta.vercel.app"
+     }));
+
 app.use(express.json());
 
 const upload = multer({ dest: "uploads/" });
