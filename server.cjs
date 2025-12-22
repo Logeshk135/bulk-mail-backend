@@ -2,8 +2,6 @@ const express = require("express");
 const cors = require("cors");
 const multer = require("multer")
 const nodemailer = require("nodemailer");
-const mongoose = require('mongoose');
-const credential = mongoose.model("credential", {}, "bulkmail");
 
  const app = express();
 
@@ -27,65 +25,43 @@ app.post("/upload-excel", upload.single("file"), async (req, res) => {
   }
 });
 
-mongoose.connect(process.env.MONGO_URL)
-  .then(() => console.log("MongoDB connected"))
-  .catch(err => console.log("MongoDB error", err));
-
 
 
 app.get("/", (req, res) => {
   res.send("Server is running");
 });
 
-app.post('/sendemail', (req, res) => {
+app.post('/sendemail', async (req, res) => {
+  try {
+    const { msg, emailList } = req.body;
 
-    var msg = req.body.msg;
-    var emailList = req.body.emailList;
-
-    credential.find().then(function (data) {
-
-        const transporter = nodemailer.createTransport({
-            service: 'gmail',
-            auth: {
-               user: process.env.EMAIL_USER,
-               pass: process.env.EMAIL_PASS
-            },
-        });
-
-        new Promise(async (resolve, reject) => {
-            try {
-                for (var i = 0; i < emailList.length; i++) {
-                    await transporter.sendMail(
-                        {
-                            from: "logeshk135@gmail.com",
-                            to: emailList[i],
-                            subject: "A message from bulkmail",
-                            text: req.body.msg,
-                        }
-                    )
-
-                    console.log("Email sent to " + emailList[i])
-
-                }
-
-                resolve("success");
-
-            }
-            catch (error) {
-                reject("Failed");
-            }
-        }).then(function () {
-            res.send(true);
-        }).catch(function () {
-            res.send(false);
-        });
-
-    }).catch(function (error) {
-        console.log(error);
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS
+      },
     });
 
+    for (let i = 0; i < emailList.length; i++) {
+      await transporter.sendMail({
+        from: process.env.EMAIL_USER,
+        to: emailList[i],
+        subject: "A message from bulkmail",
+        text: msg,
+      });
 
-})
+      console.log("Email sent to", emailList[i]);
+    }
+
+    res.json({ success: true });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false });
+  }
+});
+
 
 
 const PORT = process.env.PORT || 5000;
