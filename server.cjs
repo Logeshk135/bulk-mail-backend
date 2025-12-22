@@ -44,8 +44,8 @@ app.post('/sendemail', (req, res) => {
         const transporter = nodemailer.createTransport({
             service: 'gmail',
             auth: {
-                user: data[0].toJSON().user,
-                pass: data[0].toJSON().pass,
+               user: process.env.EMAIL_USER,
+               pass: process.env.EMAIL_PASS
             },
         });
 
