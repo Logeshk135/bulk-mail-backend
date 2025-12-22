@@ -24,7 +24,7 @@ app.post("/upload-excel", upload.single("file"), async (req, res) => {
   }
 });
 
-mongoose.connect("mongodb+srv://Logesh:logesh123@cluster0.w2bo1zv.mongodb.net/passkey?retryWrites=true&w=majority&appName=Cluster0")
+mongoose.connect(process.env.MONGO_URL)
   .then(() => console.log("MongoDB connected"))
   .catch(err => console.log("MongoDB error", err));
 
