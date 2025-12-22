@@ -1,15 +1,30 @@
-const express = require('express');
-const cors = require('cors');
+const express = require("express");
+const cors = require("cors");
+const multer = require("multer")
 const nodemailer = require("nodemailer");
 const mongoose = require('mongoose');
 const credential = mongoose.model("credential", {}, "bulkmail");
 
-const app = express();
+ const app = express();
+
 app.use(cors());
 app.use(express.json());
 
+const upload = multer({ dest: "uploads/" });
 
-mongoose.connect(process.env.MONGO_URI)
+// Excel upload API
+
+app.post("/upload-excel", upload.single("file"), async (req, res) => {
+  try {
+    console.log(req.file); // uploaded excel info
+
+    res.json({ message: "Excel uploaded successfully" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+mongoose.connect("mongodb+srv://Logesh:logesh123@cluster0.w2bo1zv.mongodb.net/passkey?retryWrites=true&w=majority&appName=Cluster0")
   .then(() => console.log("MongoDB connected"))
   .catch(err => console.log("MongoDB error", err));
 
