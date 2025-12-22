@@ -34,7 +34,7 @@ app.get("/", (req, res) => {
   res.send("Server is running");
 });
 
-app.post('/api/sendemail', (req, res) => {
+app.post('/sendemail', (req, res) => {
 
     var msg = req.body.msg;
     var emailList = req.body.emailList;
