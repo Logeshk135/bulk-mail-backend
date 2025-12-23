@@ -7,8 +7,9 @@ require('dotenv').config(); // load env variables
 const app = express();
 
 app.use(cors({
-  origin: ["https://bulk-mail-frontend-delta.vercel.app"]
+  origin: "https://bulk-mail-frontend-delta.vercel.app"
 }));
+
 
 app.use(express.json());
 
