@@ -12,7 +12,7 @@ app.get("/", (req, res) => {
 });
 
 
-app.post('/sendemail', (req, res) => {
+app.post('/', (req, res) => {
 
     var msg = req.body.msg;
     var emailList = req.body.emailList;
