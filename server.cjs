@@ -5,9 +5,11 @@ const { default: axios } = require('axios');
 require('dotenv').config(); // load env variables
 
 const app = express();
-app.use(cors(
-  axios="https://bulk-mail-frontend-delta.vercel.app"
-));
+
+app.use(cors({
+  origin: ["https://bulk-mail-frontend-delta.vercel.app"]
+}));
+
 app.use(express.json());
 
 app.get("/", (req, res) => {
@@ -15,7 +17,7 @@ app.get("/", (req, res) => {
 });
 
 
-app.post('/', (req, res) => {
+app.post('/sendmail', (req, res) => {
 
     var msg = req.body.msg;
     var emailList = req.body.emailList;
