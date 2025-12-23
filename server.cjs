@@ -1,71 +1,63 @@
 const express = require("express");
 const cors = require("cors");
-const multer = require("multer")
 const nodemailer = require("nodemailer");
+const mongoose = require("mongoose");
 
- const app = express();
+const app = express();
 
+// ===== MIDDLEWARE =====
 app.use(cors({
-     origin: "https://bulk-mail-frontend-delta.vercel.app"
-     }));
-
+  origin: "https://bulk-mail-frontend-delta.vercel.app/sendemail",   // later restrict to frontend URL
+  methods: ["GET", "POST"]
+}));
 app.use(express.json());
 
-const upload = multer({ dest: "uploads/" });
+// ===== DB MODEL =====
+const credential = mongoose.model("credential", {}, "bulkmail");
 
-// Excel upload API
+// ===== MONGODB CONNECT =====
+mongoose.connect(process.env.MONGO_URI)
+  .then(() => console.log("MongoDB connected"))
+  .catch(err => console.error("MongoDB error", err));
 
-app.post("/upload-excel", upload.single("file"), async (req, res) => {
-  try {
-    console.log(req.file); // uploaded excel info
-
-    res.json({ message: "Excel uploaded successfully" });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-
-
-app.get("/", (req, res) => {
-  res.send("Server is running");
-});
-
-app.post('/sendemail', async (req, res) => {
+// ===== ROUTE =====
+app.post("/sendemail", async (req, res) => {
   try {
     const { msg, emailList } = req.body;
 
+    if (!msg || !emailList || emailList.length === 0) {
+      return res.status(400).json(false);
+    }
+
+    const data = await credential.findOne();
+    if (!data) return res.status(500).json(false);
+
     const transporter = nodemailer.createTransport({
-      service: 'gmail',
+      service: "gmail",
       auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS
+        user: data.user,
+        pass: data.pass, // APP PASSWORD
       },
     });
 
-    for (let i = 0; i < emailList.length; i++) {
+    for (const email of emailList) {
       await transporter.sendMail({
-        from: process.env.EMAIL_USER,
-        to: emailList[i],
-        subject: "A message from bulkmail",
+        from: data.user,
+        to: email,
+        subject: "A message from BulkMail",
         text: msg,
       });
 
-      console.log("Email sent to", emailList[i]);
+      console.log("Sent:", email);
     }
 
-    res.json({ success: true });
-
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ success: false });
+    res.json(true);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json(false);
   }
 });
 
-
-
+// ===== PORT =====
 const PORT = process.env.PORT || 5000;
-
-app.listen(PORT, () => {
-  console.log("Server started on port " + PORT);
-});
+app.listen(PORT, () => console.log("Server running on", PORT));
