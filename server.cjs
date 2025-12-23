@@ -5,11 +5,13 @@ const mongoose = require("mongoose");
 
 const app = express();
 
+const API = import.meta.env.VITE_API_URL;
 // ===== MIDDLEWARE =====
-app.use(cors({
-  origin: "https://bulk-mail-frontend-delta.vercel.app/sendemail",   // later restrict to frontend URL
-  methods: ["GET", "POST"]
-}));
+
+axios.post(`${API}/sendemail`, {
+  msg,
+  emailList
+});
 app.use(express.json());
 
 // ===== DB MODEL =====
