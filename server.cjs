@@ -1,10 +1,13 @@
 const express = require('express');
 const cors = require('cors');
 const nodemailer = require("nodemailer");
+const { default: axios } = require('axios');
 require('dotenv').config(); // load env variables
 
 const app = express();
-app.use(cors());
+app.use(cors(
+  axios="https://bulk-mail-frontend-delta.vercel.app"
+));
 app.use(express.json());
 
 app.get("/", (req, res) => {
