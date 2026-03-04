@@ -2,73 +2,66 @@ const express = require('express');
 const cors = require('cors');
 const nodemailer = require("nodemailer");
 const mongoose = require('mongoose');
-const credential = mongoose.model("credential", {}, "bulkmail");
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
+// ✅ Proper Schema
+const credentialSchema = new mongoose.Schema({
+  user: String,
+  pass: String
+});
+
+const credential = mongoose.model("credential", credentialSchema, "bulkmail");
+
+// ✅ MongoDB Connect (use your real URL)
+mongoose.connect("mongodb+srv://Logesh:logesh123@cluster0.w2bo1zv.mongodb.net/passkey?retryWrites=true&w=majority&appName=Cluster0")
+.then(() => console.log("Mongodb connected"))
+.catch((err) => console.log("Mongodb connection failed", err));
+
 app.get('/', (req, res) => {
     res.send("Server is running successfully 🚀");
 });
 
-mongoose.connect("mongodb+srv://Logesh:logesh123@cluster0.w2bo1zv.mongodb.net/passkey?retryWrites=true&w=majority&appName=Cluster0").then(function () {
-    console.log("Mongodb connected");
-}).catch(function () {
-    console.log("Mongodb connection failed");
-})
+app.post('/sendemail', async (req, res) => {
 
-app.post('/sendemail', (req, res) => {
+    try {
+        const { msg, emailList } = req.body;
 
-    var msg = req.body.msg;
-    var emailList = req.body.emailList;
+        const data = await credential.find();
 
-    credential.find().then(function (data) {
+        if (!data.length) {
+            console.log("No credentials found in DB");
+            return res.send(false);
+        }
 
         const transporter = nodemailer.createTransport({
             service: 'gmail',
             auth: {
-                user: data[0].toJSON().user,
-                pass: data[0].toJSON().pass,
+                user: data[0].user,
+                pass: data[0].pass,
             },
         });
 
-        new Promise(async (resolve, reject) => {
-            try {
-                for (var i = 0; i < emailList.length; i++) {
-                    await transporter.sendMail(
-                        {
-                            from: "logeshk135@gmail.com",
-                            to: emailList[i],
-                            subject: "A message from bulkmail",
-                            text: req.body.msg,
-                        }
-                    )
+        for (let i = 0; i < emailList.length; i++) {
+            await transporter.sendMail({
+                from: data[0].user,
+                to: emailList[i],
+                subject: "A message from bulkmail",
+                text: msg,
+            });
 
-                    console.log("Email sent to " + emailList[i])
+            console.log("Email sent to " + emailList[i]);
+        }
 
-                }
+        res.send(true);
 
-                resolve("success");
-
-            }
-            catch (error) {
-                reject("Failed");
-            }
-        }).then(function () {
-            res.send(true);
-        }).catch(function () {
-            res.send(false);
-        });
-
-    }).catch(function (error) {
-        console.log(error);
-    });
-
-
-})
-
-
+    } catch (error) {
+        console.log("EMAIL ERROR:", error);
+        res.send(false);
+    }
+});
 
 app.listen(5000, () => {
     console.log('Server is started');
